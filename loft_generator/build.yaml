@@ -1,0 +1,17 @@
+targets:
+  $default:
+    builders:
+      retrofit_generator|retrofit:
+        enabled: true
+
+builders:
+  retrofit:
+    target: ":loft_generator" 
+    import: "package:loft_generator/builder.dart"  #Required. The import uri that should be used to import the library containing the Builder class. This should always be a package: uri
+    builder_factories: ["loftFactory"] 
+    build_extensions: {".dart": [".loft.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
+
+# check https://pub.dartlang.org/packages/build_config for more info
