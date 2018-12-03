@@ -12,6 +12,7 @@ dependencies:
   code_builder:
   build:
   analyzer:
+  recase:
  
   loft:
     path: '../loft'

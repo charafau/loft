@@ -18,20 +18,33 @@ class ColumnInfo {
 }
 
 @immutable
-class Dao {}
+class Dao {
+  const Dao();
+}
 
 @immutable
 class Query {
   final String query;
 
-  Query(this.query);
+  const Query(this.query);
 }
 
 @immutable
-class Insert {}
+class Insert {
+  const Insert();
+}
 
 @immutable
 class Update {}
 
 @immutable
 class Delete {}
+
+@immutable
+class LoftDb {
+  final String databaseName;
+  final int version;
+  final List<Type> entities;
+
+  const LoftDb(this.databaseName, {@required this.entities, this.version = 1});
+}

@@ -2,6 +2,12 @@ import 'dart:async';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:built_collection/built_collection.dart';
+import 'package:code_builder/code_builder.dart';
+import 'package:dart_style/dart_style.dart';
+import 'package:loft_generator/fields_mapper.dart';
+import 'package:recase/recase.dart';
+
 // import 'package:retrofit_generator/src/retrofit_source_class.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:loft/src/annotations.dart';
@@ -12,33 +18,6 @@ import 'package:loft/src/annotations.dart';
  */
 class LoftGenerator extends GeneratorForAnnotation<Entity> {
   const LoftGenerator();
-
-  // @override
-  // Future<String> generate(LibraryReader library, BuildStep buildStep) async {
-  //   final result = new StringBuffer();
-
-  //   for (final element in library.allElements) {
-  //     //check if our current file contains RetrofitRestService
-  //     if (element is ClassElement){
-  //     // if (element is ClassElement &&
-  //         // RetrofitSourceClass.needsBuiltValue(element)) {
-
-  //       try {
-  //         //generate code here
-  //         // result.writeln(RetrofitSourceClass(element).generateCode());
-  //       } catch (e, st) {
-  //         result.writeln(_error(e));
-  //         log.severe('Error in RetrofitGenerator for $element.', e, st);
-  //       }
-  //     }
-  //   }
-
-  //   if (result.isNotEmpty) {
-  //     return '$result';
-  //   } else {
-  //     return null;
-  //   }
-  // }
 
   @override
   FutureOr<String> generateForAnnotatedElement(
@@ -58,10 +37,75 @@ String _buildImplementionClass(
   ConstantReader annotation,
   ClassElement element,
 ) {
+  final _dartfmt = new DartFormatter();
 
-  String a = element.fields.map((e) => e.name).join(', ');
+//  String a = element.fields.map((e) => e.name).join(', ');
 
-  return a;
+  final classBuilder = Class((c) => c
+    ..name = '_\$${element.name}'
+    ..extend = Reference(element.name)
+    ..methods = ListBuilder(_buildCreateMethod(element)));
+
+  String classString = classBuilder.accept(DartEmitter()).toString();
+
+  String output = _dartfmt.format(classString);
+
+  return output;
+}
+
+List _buildCreateMethod(ClassElement element) {
+  var fields = element.fields
+      .map((FieldElement field) =>
+          ReCase(field.name).snakeCase +
+          " " +
+          FieldsMapper().mapDartTypeToSql(field.type.displayName))
+      .join(', ');
+
+  List<Method> methods = [];
+
+  methods.add(Method(
+    (m) => m
+      ..name = "generate"
+      ..body = Code("return 'CREATE TABLE ${element.name} ($fields) ;';")
+      ..returns = Reference('String'),
+  ));
+
+  element.methods.forEach((query) {
+    if (query.metadata != null && query.metadata.isNotEmpty) {
+      ElementAnnotation meta = query.metadata[0];
+      if (meta.constantValue.type.displayName == "Query") {
+        meta.constantValue.getField("query").toStringValue();
+      }
+      if (meta.constantValue.type.displayName == "Insert") {
+        var fields =
+            element.fields.map((FieldElement field) => field.name).join(', ');
+//          +
+//          " " +
+//          FieldsMapper().mapDartTypeToSql(field.type.displayName))
+//          .join(', ');
+
+        methods.add(Method((m) => m
+          ..name = query.name
+          ..returns = Reference("void")
+          ..modifier = MethodModifier.async
+          ..requiredParameters = ListBuilder(query.parameters)
+          ..body = Code('''
+            String path = await _getDatabasePath();
+
+    Database database = await _getDatabase(path);
+    
+    await database.transaction((txn) async {
+      int id1 = await txn.rawInsert('INSERT INTO ${element.name}($fields) VALUES(${element.fields.map((f) => '\${this.${f.name}}').join((','))})');
+      
+    });
+    
+          ''')));
+//      "INSERT INTO ${element.name}($fields) VALUES ()";
+      }
+    }
+  });
+
+  return methods;
 }
 
 String _error(Object error) {
