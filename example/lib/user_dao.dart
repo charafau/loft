@@ -9,7 +9,10 @@ part 'user_dao.g.dart';
 @Dao()
 abstract class UserDao extends BaseDao {
   @Query('SELECT * FROM User WHERE id = :id')
-  User fetch(int id);
+  Future<User> fetch(int id);
+
+  @Query('SELECT * FROM User')
+  Future<List<User>> fetchAll();
 
   @Insert()
   void insert(User user);
