@@ -23,4 +23,8 @@ abstract class UserDao extends BaseDao {
     String path = join(databasesPath, 'demo.db');
     return path;
   }
+
+  UserDao._();
+
+  factory UserDao() = _$UserDao;
 }

@@ -7,6 +7,8 @@ part of 'user_dao.dart';
 // **************************************************************************
 
 class _$UserDao extends UserDao {
+  _$UserDao() : super._() {}
+
   Future<User> fetch(int id) async {
     String path = await getDatabasePath();
     Database database = await openDatabase(path);

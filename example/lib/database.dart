@@ -8,9 +8,9 @@ import 'package:path/path.dart';
 part 'database.g.dart';
 
 @LoftDb('todo.db', entities: [User])
-abstract class TodoDatabase extends LoftDatabase {
+class TodoDatabase extends LoftDatabase {
 
 
-//  TodoDao todoDao();
+  void generate() => _$TodoDatabase().generate();
 
 }

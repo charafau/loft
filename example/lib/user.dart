@@ -11,7 +11,7 @@ class User {
 
   int age;
 
-  User({this.name});
+  User({this.name, this.age});
 
   String schema() => _$User().generate();
 

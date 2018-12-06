@@ -38,6 +38,11 @@ String _buildImplementionClass(
   final classBuilder = Class((c) => c
     ..name = '_\$${element.name}'
     ..extend = Reference(element.name)
+    ..constructors = ListBuilder([
+      Constructor((c) => c
+          ..initializers = ListBuilder([Code("super._()")])
+        ..body = Code(""))
+    ])
     ..methods = ListBuilder(_buildCreateMethod(element)));
 
   String classString = classBuilder.accept(DartEmitter()).toString();
