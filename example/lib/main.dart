@@ -43,6 +43,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () async {
                 var uDao = UserDao();
                 var all = await uDao.fetchAll();
+                print('all: ${all.length}');
                 all.forEach((u) {
                   print('user is ${u.toString()}');
                 });
