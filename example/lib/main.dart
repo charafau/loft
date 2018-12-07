@@ -38,6 +38,16 @@ class HomeScreen extends StatelessWidget {
                 uDao.insert(User(name: "Bob", age: 25));
               },
             ),
+            RaisedButton(
+              child: Text('fetch '),
+              onPressed: () async {
+                var uDao = UserDao();
+                var all = await uDao.fetchAll();
+                all.forEach((u) {
+                  print('user is ${u.toString()}');
+                });
+              },
+            ),
           ],
         ),
       ),

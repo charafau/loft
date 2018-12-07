@@ -40,7 +40,7 @@ String _buildImplementionClass(
     ..extend = Reference(element.name)
     ..constructors = ListBuilder([
       Constructor((c) => c
-          ..initializers = ListBuilder([Code("super._()")])
+        ..initializers = ListBuilder([Code("super._()")])
         ..body = Code(""))
     ])
     ..methods = ListBuilder(_buildCreateMethod(element)));
@@ -131,14 +131,25 @@ List _buildCreateMethod(ClassElement element) {
         });
         var p = insertMethods.parameters[0].name;
 
+        List<String> values = [];
+        params.forEach((String key, String value) {
+          if (value == 'String') {
+            values.add('"' + '\${' + p + "." + key + '}' + '"');
+          } else {
+            values.add('\${' + p + "." + key + '}');
+          }
+        });
+
+        String insertValues = values.join(', ');
+
         String insertQuery =
-            "INSERT INTO ${methodType.name}(${params.keys.join(', ')}) VALUES (${params.keys.map((k) => '\${' + p + "." + k + '}').join((', '))});";
+            "INSERT INTO ${methodType.name}(${params.keys.join(', ')}) VALUES ($insertValues);";
 
         String insertCode = """
   String path = await getDatabasePath();
   Database database = await openDatabase(path);
   await database.transaction((txn) async {
-    await txn.rawInsert("$insertQuery");
+    await txn.rawInsert('$insertQuery');
   });
 
   """;
@@ -148,8 +159,8 @@ List _buildCreateMethod(ClassElement element) {
             (m) => m
               ..requiredParameters = ListBuilder([
                 Parameter((b) => b
-                  ..name = 'user'
-                  ..type = Reference('User'))
+                  ..name = insertMethods.parameters[0].name.toLowerCase()
+                  ..type = Reference(insertMethods.parameters[0].type.toString()))
               ])
               ..modifier = MethodModifier.async
               ..name = insertMethods.name

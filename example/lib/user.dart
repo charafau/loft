@@ -1,7 +1,4 @@
 import 'package:loft/src/annotations.dart';
-import 'package:loft/src/base.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 
 part 'user.g.dart';
 
@@ -18,5 +15,10 @@ class User {
   User.fromMap(Map<String, dynamic> map) {
     name = map['name'];
     age = map['age'];
+  }
+
+  @override
+  String toString() {
+    return 'User{name: $name, age: $age}';
   }
 }
