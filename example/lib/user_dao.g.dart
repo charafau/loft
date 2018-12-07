@@ -44,7 +44,7 @@ class _$UserDao extends UserDao {
     Database database = await openDatabase(path);
     await database.transaction((txn) async {
       await txn.rawInsert(
-          'INSERT INTO User(id, name, age) VALUES (${user.id}, "${user.name}", ${user.age});');
+          'INSERT INTO User(name, age) VALUES ("${user.name}", ${user.age});');
     });
   }
 }

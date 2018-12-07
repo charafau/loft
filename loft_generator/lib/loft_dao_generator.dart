@@ -126,8 +126,11 @@ List _buildCreateMethod(ClassElement element) {
         var ref = reflected.reflectee;
 
         ref.accessors.forEach((par) {
-          params.putIfAbsent(par.variable.name.toString(),
-              () => par.variable.type.name.toString());
+          List<ElementAnnotation> metadatas = par.variable.metadata;
+          if(metadatas == null || metadatas.length < 1) {
+            params.putIfAbsent(par.variable.name.toString(),
+                    () => par.variable.type.name.toString());
+          }
         });
         var p = insertMethods.parameters[0].name;
 
@@ -141,6 +144,10 @@ List _buildCreateMethod(ClassElement element) {
         });
 
         String insertValues = values.join(', ');
+
+
+
+        params.keys.join(', ');
 
         String insertQuery =
             "INSERT INTO ${methodType.name}(${params.keys.join(', ')}) VALUES ($insertValues);";
