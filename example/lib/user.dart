@@ -4,6 +4,10 @@ part 'user.g.dart';
 
 @Entity("users")
 class User {
+
+  @PrimaryKey()
+  int id;
+
   String name;
 
   int age;

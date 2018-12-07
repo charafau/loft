@@ -5,12 +5,10 @@ import 'package:build/build.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
+import 'package:loft/src/annotations.dart';
 import 'package:loft_generator/fields_mapper.dart';
 import 'package:recase/recase.dart';
-
-// import 'package:retrofit_generator/src/retrofit_source_class.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:loft/src/annotations.dart';
 
 /**
  * THIS SCANS ALL FILES IN PROJECT AND CHECKS IF THIS IS YOUR RetrofitRestService
@@ -39,8 +37,6 @@ String _buildImplementionClass(
 ) {
   final _dartfmt = new DartFormatter();
 
-//  String a = element.fields.map((e) => e.name).join(', ');
-
   final classBuilder = Class((c) => c
     ..name = '_\$${element.name}'
     ..extend = Reference(element.name)
@@ -55,10 +51,13 @@ String _buildImplementionClass(
 
 List _buildCreateMethod(ClassElement element) {
   var fields = element.fields
-      .map((FieldElement field) =>
-          ReCase(field.name).snakeCase +
-          " " +
-          FieldsMapper().mapDartTypeToSql(field.type.displayName))
+      .map(
+        (FieldElement field) =>
+            ReCase(field.name).snakeCase +
+            " " +
+            FieldsMapper().mapDartTypeToSql(field.type.displayName) +
+            _isPrimaryKey(field),
+      )
       .join(', ');
 
   List<Method> methods = [];
@@ -70,42 +69,19 @@ List _buildCreateMethod(ClassElement element) {
       ..returns = Reference('String'),
   ));
 
-  element.methods.forEach((query) {
-    if (query.metadata != null && query.metadata.isNotEmpty) {
-      ElementAnnotation meta = query.metadata[0];
-      if (meta.constantValue.type.displayName == "Query") {
-        meta.constantValue.getField("query").toStringValue();
-      }
-      if (meta.constantValue.type.displayName == "Insert") {
-        var fields =
-            element.fields.map((FieldElement field) => field.name).join(', ');
-//          +
-//          " " +
-//          FieldsMapper().mapDartTypeToSql(field.type.displayName))
-//          .join(', ');
-
-        methods.add(Method((m) => m
-          ..name = query.name
-          ..returns = Reference("void")
-          ..modifier = MethodModifier.async
-          ..requiredParameters = ListBuilder(query.parameters)
-          ..body = Code('''
-            String path = await _getDatabasePath();
-
-    Database database = await _getDatabase(path);
-    
-    await database.transaction((txn) async {
-      int id1 = await txn.rawInsert('INSERT INTO ${element.name}($fields) VALUES(${element.fields.map((f) => '\${this.${f.name}}').join((','))})');
-      
-    });
-    
-          ''')));
-//      "INSERT INTO ${element.name}($fields) VALUES ()";
-      }
-    }
-  });
-
   return methods;
+}
+
+String _isPrimaryKey(FieldElement f) {
+  if (f.metadata != null && f.metadata.length > 0) {
+    var meta = f.metadata[0];
+    print('meta $meta');
+    var annotation = meta.constantValue.type.name;
+    if (annotation == "PrimaryKey") {
+      return " NOT NULL PRIMARY KEY AUTOINCREMENT";
+    }
+  }
+  return "";
 }
 
 String _error(Object error) {

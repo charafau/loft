@@ -8,7 +8,9 @@ class Entity {
 }
 
 @immutable
-class PrimaryKey {}
+class PrimaryKey {
+  const PrimaryKey();
+}
 
 @immutable
 class ColumnInfo {

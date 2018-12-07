@@ -8,6 +8,6 @@ part of 'user.dart';
 
 class _$User extends User {
   String generate() {
-    return 'CREATE TABLE User (name TEXT, age INTEGER) ;';
+    return 'CREATE TABLE User (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER) ;';
   }
 }
