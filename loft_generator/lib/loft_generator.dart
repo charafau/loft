@@ -69,6 +69,14 @@ List _buildCreateMethod(ClassElement element) {
       ..returns = Reference('String'),
   ));
 
+  methods.add(Method(
+    (m) => m
+      ..name = "drop"
+      ..body =
+          Code("return 'DROP TABLE IF EXISTS ${element.name};';")
+      ..returns = Reference('String'),
+  ));
+
   return methods;
 }
 

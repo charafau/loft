@@ -9,7 +9,7 @@ part of 'database.dart';
 class _$TodoDatabase extends TodoDatabase {
   void generate() async {
     var databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, "demo2.db");
+    String path = join(databasesPath, "demo.db");
 
     Database database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
@@ -18,5 +18,16 @@ class _$TodoDatabase extends TodoDatabase {
     });
 
     ;
+  }
+
+  void drop() async {
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, "demo.db");
+
+    Database database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      // When creating the db, create the table
+      await db.execute(User().drop());
+    });
   }
 }

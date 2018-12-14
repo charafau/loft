@@ -16,6 +16,8 @@ class User {
 
   String schema() => _$User().generate();
 
+  String drop() => _$User().drop();
+
   User.fromMap(Map<String, dynamic> map) {
     id = map['id'];
     name = map['name'];

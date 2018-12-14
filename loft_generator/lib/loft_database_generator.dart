@@ -88,6 +88,20 @@ class LoftDatabaseGenerator extends GeneratorForAnnotation<LoftDb> {
     ''';
 
     daoOutput += ';';
+
+    String dropCode = '''
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, "demo.db");
+
+    Database database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      // When creating the db, create the table
+      await db
+          .execute(${daoClasses.map((d) => d.toTypeValue().toString() + '().drop()').join(' + " "').toString()});
+
+    });
+    ''';
+
     return [
       Method(
         (m) => m
@@ -95,6 +109,15 @@ class LoftDatabaseGenerator extends GeneratorForAnnotation<LoftDb> {
           ..modifier = MethodModifier.async
           ..body = Code(
             daoOutput,
+          )
+          ..returns = Reference('void'),
+      ),
+      Method(
+            (m) => m
+          ..name = "drop"
+          ..modifier = MethodModifier.async
+          ..body = Code(
+            dropCode,
           )
           ..returns = Reference('void'),
       )
