@@ -2,15 +2,12 @@ import 'dart:async';
 
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
-
-// import 'package:retrofit_generator/src/retrofit_source_class.dart';
-import 'package:source_gen/source_gen.dart';
 import 'package:loft/src/annotations.dart';
+import 'package:source_gen/source_gen.dart';
 
 /**
  * THIS SCANS ALL FILES IN PROJECT AND CHECKS IF THIS IS YOUR RetrofitRestService
@@ -42,32 +39,17 @@ class LoftDatabaseGenerator extends GeneratorForAnnotation<LoftDb> {
       ..name = '_\$${element.name}'
       ..extend = Reference(element.name)
       ..methods = ListBuilder(_buildCreateMethod(element, annotation)));
-    ElementAnnotation metadata = element.metadata[0];
 
     List<DartObject> a = annotation.peek("entities").listValue;
 
     String asd = ' ';
     a.forEach((d) => asd += d.toTypeValue().toString());
 
-    var b = TypeChecker.fromRuntime(a[0].runtimeType);
-
-//  metadata.element.
-//
-//    var method = element.methods[0];
-//
-
-//    DartType returnType = method.returnType;
-//    Element element2 = returnType.element;
-//    element2.library.
-//
     String classString = classBuilder.accept(DartEmitter()).toString();
 
     String output = _dartfmt.format(classString);
 
-
-
     return output;
-//    return output;
   }
 
   List _buildCreateMethod(ClassElement element, ConstantReader annotation) {
@@ -113,7 +95,7 @@ class LoftDatabaseGenerator extends GeneratorForAnnotation<LoftDb> {
           ..returns = Reference('void'),
       ),
       Method(
-            (m) => m
+        (m) => m
           ..name = "drop"
           ..modifier = MethodModifier.async
           ..body = Code(

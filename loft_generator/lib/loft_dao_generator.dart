@@ -23,8 +23,6 @@ class LoftDaoGenerator extends GeneratorForAnnotation<Dao> {
           todo: 'Remove the Entity annotation from `$friendlyName`.');
     }
 
-    var input = await buildStep.inputLibrary;
-
     return _buildImplementionClass(annotation, element);
   }
 }
@@ -68,7 +66,7 @@ List _buildCreateMethod(ClassElement element) {
           String path = await getDatabasePath();
   Database database = await openDatabase(path);
   
-    var records = await database.rawQuery("SELECT * FROM User;");
+    var records = await database.rawQuery("$query;");
     List<${_typeFromFuture(_typeFromFuture(method.returnType.toString()))}> retRecords = [];
     if (records != null) {
       
@@ -83,11 +81,13 @@ List _buildCreateMethod(ClassElement element) {
   
           """;
         } else {
+          //query
+
           queryCode = """
   String path = await getDatabasePath();
   Database database = await openDatabase(path);
   
-    var records = await database.rawQuery("SELECT * FROM User WHERE id = :id;");
+    var records = await database.rawQuery("$query;");
     if(records != null && records.length > 0){
       Map<String, dynamic> r = records[0];
       return ${_typeFromFuture(method.returnType.toString())}.fromMap(r);
@@ -127,9 +127,9 @@ List _buildCreateMethod(ClassElement element) {
 
         ref.accessors.forEach((par) {
           List<ElementAnnotation> metadatas = par.variable.metadata;
-          if(metadatas == null || metadatas.length < 1) {
+          if (metadatas == null || metadatas.length < 1) {
             params.putIfAbsent(par.variable.name.toString(),
-                    () => par.variable.type.name.toString());
+                () => par.variable.type.name.toString());
           }
         });
         var p = insertMethods.parameters[0].name;
@@ -144,8 +144,6 @@ List _buildCreateMethod(ClassElement element) {
         });
 
         String insertValues = values.join(', ');
-
-
 
         params.keys.join(', ');
 
@@ -167,7 +165,8 @@ List _buildCreateMethod(ClassElement element) {
               ..requiredParameters = ListBuilder([
                 Parameter((b) => b
                   ..name = insertMethods.parameters[0].name.toLowerCase()
-                  ..type = Reference(insertMethods.parameters[0].type.toString()))
+                  ..type =
+                      Reference(insertMethods.parameters[0].type.toString()))
               ])
               ..modifier = MethodModifier.async
               ..name = insertMethods.name
